@@ -2,13 +2,13 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8"/>
-<title>MyWebShare</title>
+<title>MyWebShare - Client</title>
 <script type="text/javascript" src="//code.jquery.com/jquery-2.2.4.min.js"></script>
 <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet"/>
 <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
 <link href="//use.fontawesome.com/releases/v5.8.1/css/all.css" rel="stylesheet"/>
 <script src="/socket.io/socket.io.js"></script>
-<script src="./js/mywebshare.js"></script>
+<script src="./js/mywebshare-client.js"></script>
 <link href="./css/mywebshare.css" rel="stylesheet"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 
@@ -21,12 +21,12 @@
 <body>
 
 <div class="container">
-  <button class="btn btn-success" id="recBtn" value="Rec" onClick="startRec();" style="display:block;"><i class="fa fa-microphone" aria-hidden="true"></i></button>
-  <button class="btn btn-danger" id="stopBtn" value="Stop" onClick="stopRec();" style="display:none;"><i class="fa fa-stop" aria-hidden="true"></i></button>
 </div>
 
-<div class="container">
+<div class="container" id="video_container">
+  <!--
   <video id="video" autoplay style="width:60%; height:50%;"></video>
+-->
 </div>
 
 <div class="container">
