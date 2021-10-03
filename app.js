@@ -4,7 +4,6 @@ var express = require( 'express' ),
     ejs = require( 'ejs' ),
     fs = require( 'fs' ),
     app = express();
-var { Readable } = require( 'stream' );
 
 var settings = require( './settings' );
 
@@ -22,7 +21,12 @@ var io = require( 'socket.io' )( http );
 
 //. Page for client
 app.get( '/', function( req, res ){
-  res.render( 'index', {} );
+  res.render( 'client', {} );
+});
+
+//. Page for server
+app.get( '/server', function( req, res ){
+  res.render( 'server', {} );
 });
 
 app.post( '/setcookie', function( req, res ){
@@ -44,13 +48,9 @@ io.sockets.on( 'connection', function( socket ){
   //. 初期化時（ロード後の最初の resized 時）
   socket.on( 'init_client', function( msg ){
     //console.log( 'init_client', msg );
-    var room = msg.room ? msg.room : settings.default_room;
-    console.log( 'room = ' + room );
-
-    socket.join( room );
 
     //io.to( room ).emit( 'init_client', msg );
-    io.emit( 'init_client', msg );
+    io.sockets.emit( 'init_client_view', msg ); //. 本人含めて全員に通知
   });
 
   socket.on( 'mic_start', function( b ){
@@ -61,35 +61,17 @@ io.sockets.on( 'connection', function( socket ){
   });
   socket.on( 'mic_input', function( data ){
     //. ここは１秒に数回実行される（データは送信されてきている）
-    console.log( 'mic_input'/*, data*/ );
+    //console.log( 'mic_input'/*, data*/ );
     //sockets[room].socket.json.emit( 'mic_input_view', data );
-    io.emit( 'mic_input_view', data );
-    /*
-    Readable.from( data.voicedata ).pipe( s2t_stream );
-    s2t_stream.on( 'data', function( evt ){
-      //. 元のクライアントにだけ stt_result を返す
-      sockets[data.uuid].emit( 'stt_result', evt ); 
-    });
-    s2t_stream.on( 'error', function( evt ){
-      console.log( 'error', evt );
-      sockets[data.uuid].emit( 'stt_error', evt ); 
-    });
-    s2t_stream.on( 'close', function( evt ){
-      console.log( 'close', evt );
-      //s2t_stream.stop();
-      //s2t_stream.unpipe();
-    });
-    */
+    io.emit( 'mic_input_view', data ); //. 全員に通知
   });
   socket.on( 'mic_stop', function( b ){
     console.log( 'mic_stop' );
-    //sockets[room].socket.json.emit( 'mic_stop_view', b );
-    io.emit( 'mic_stop_view', {} );
+    socket.broadcast.emit( 'mic_stop_view', {} );  //. 本人以外にブロードキャスト送信
   });
   socket.on( 'video_input', function( data ){
     console.log( 'video_input'/*, data*/ );
-    //sockets[room].socket.json.emit( 'video_input_view', data );
-    io.emit( 'video_input_view', data );
+    socket.broadcast.emit( 'video_input_view', data );  //. 本人以外にブロードキャスト送信
   });
 });
 

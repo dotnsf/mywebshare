@@ -74,6 +74,7 @@ function init(){
     console.log( 'init_client_view', msg );
   });
 
+  /*
   socketio.on( 'mic_input_view', function( voicedata ){
     if( !onRecording ){
       console.log( 'mic_input_view', voicedata );
@@ -87,6 +88,7 @@ function init(){
       video.srcObject = stream;
     }
   });
+  */
 }
 
 function generateUUID(){
