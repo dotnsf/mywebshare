@@ -62,7 +62,8 @@ io.sockets.on( 'connection', function( socket ){
   socket.on( 'mic_input', function( data ){
     //. ここは１秒に数回実行される（データは送信されてきている）
     console.log( 'mic_input'/*, data*/ );
-    sockets[room].socket.json.emit( 'mic_input_view', data );
+    //sockets[room].socket.json.emit( 'mic_input_view', data );
+    io.emit( 'mic_input_view', data );
     /*
     Readable.from( data.voicedata ).pipe( s2t_stream );
     s2t_stream.on( 'data', function( evt ){
@@ -82,11 +83,13 @@ io.sockets.on( 'connection', function( socket ){
   });
   socket.on( 'mic_stop', function( b ){
     console.log( 'mic_stop' );
-    sockets[room].socket.json.emit( 'mic_stop_view', b );
+    //sockets[room].socket.json.emit( 'mic_stop_view', b );
+    io.emit( 'mic_stop_view', {} );
   });
   socket.on( 'video_input', function( data ){
     console.log( 'video_input'/*, data*/ );
-    sockets[room].socket.json.emit( 'video_input_view', data );
+    //sockets[room].socket.json.emit( 'video_input_view', data );
+    io.emit( 'video_input_view', data );
   });
 });
 
