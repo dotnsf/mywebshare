@@ -19,8 +19,13 @@ app.set( 'view engine', 'ejs' );
 var http = require( 'http' ).createServer( app );
 var io = require( 'socket.io' )( http );
 
-//. Page for client
+//. Page for main
 app.get( '/', function( req, res ){
+  res.render( 'index', {} );
+});
+
+//. Page for client
+app.get( '/client', function( req, res ){
   res.render( 'client', {} );
 });
 
@@ -45,6 +50,30 @@ app.post( '/setcookie', function( req, res ){
 io.sockets.on( 'connection', function( socket ){
   console.log( 'connected.' );
 
+  //. rooms
+  socket.on( 'enter', function( roomname ){
+    socket.join( roomname );
+    console.log( socket.id + ' enter room: ' + roomname );
+    setRoomname( roomname );
+  });
+
+  function setRoomname( roomname ){
+    socket.roomname = roomname;
+  }
+
+  function getRoomname(){
+    return socket.roomname;
+  }
+
+  function emitMessage( type, message ){
+    var roomname = getRoomname();
+    if( roomname ){
+      socket.broadcast.to( roomname ).emit( type, message );
+    }else{
+      socket.broadcast.emit( type, message );
+    }
+  }
+
   //. 初期化時（ロード後の最初の resized 時）
   socket.on( 'init_client', function( msg ){
     //console.log( 'init_client', msg );
@@ -53,6 +82,29 @@ io.sockets.on( 'connection', function( socket ){
     io.sockets.emit( 'init_client_view', msg ); //. 本人含めて全員に通知
   });
 
+  socket.on( 'message', function( message ){
+    var date = new Date();
+    message.from = socket.id;
+    var target = message.sendto;
+    if( target ){
+      socket.to( target ).emit( 'message', message );
+      return;
+    }
+
+    emitMessage( 'message', message );
+  });
+
+  socket.on( 'disconnect', function(){
+    console.log( ( new Date() ) + ' Peer disconnected. id = ' + socket.id );
+    emitMessage( 'user disconnected', { id: socket.id } );
+
+    var roomname = getRoomname();
+    if( roomname ){
+      socket.leave( roomname);
+    }
+  });
+
+  /*
   socket.on( 'mic_start', function( b ){
     console.log( 'mic_start' );
   });
@@ -61,8 +113,6 @@ io.sockets.on( 'connection', function( socket ){
   });
   socket.on( 'mic_input', function( data ){
     //. ここは１秒に数回実行される（データは送信されてきている）
-    //console.log( 'mic_input'/*, data*/ );
-    //sockets[room].socket.json.emit( 'mic_input_view', data );
     io.emit( 'mic_input_view', data ); //. 全員に通知
   });
   socket.on( 'mic_stop', function( b ){
@@ -70,9 +120,10 @@ io.sockets.on( 'connection', function( socket ){
     socket.broadcast.emit( 'mic_stop_view', {} );  //. 本人以外にブロードキャスト送信
   });
   socket.on( 'video_input', function( data ){
-    console.log( 'video_input'/*, data*/ );
+    console.log( 'video_input' );
     socket.broadcast.emit( 'video_input_view', data );  //. 本人以外にブロードキャスト送信
   });
+  */
 });
 
 
