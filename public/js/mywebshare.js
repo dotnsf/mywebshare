@@ -55,7 +55,7 @@ function init(){
       setAnswer( from_id, answer );
     }else if( message.type == 'candidate' ){
       console.log( 'received ICE candidate ...' );
-      var candidate = new RTCIceCandidate( message );
+      var candidate = new RTCIceCandidate( message ); //. ２台目して startVideo() 後に Connect すると、Chrome: "Uncaught TypeError: Failed to construct 'RTCIceCandidate': sdpMid and sdpMLineIndex are both null.", FireFox: "Uncaught TypeError: Either sdpMid or sdpMLineIndex must be specified" エラー
       addIceCandidate( from_id, candidate );
     }else if( message.type == 'call me' ){
       if( !isReadyToConnect() ){
@@ -219,7 +219,10 @@ function startVideo(){
     local_stream = stream;
     playVideo( local_video, stream );
   }).catch( function( err ){
-    console.log( 'getUserMedia error', err );
+    //. 同じ PC から複数のブラウザで startVideo() を実行すると、１台目は成功して、２台目以降は失敗する
+    //. これはこれで挙動としては正しい
+    console.log( 'getUserMedia error', err );  
+    //. Chrome: DOMException: Coud not start video source, FireFox: Starting videoinput failed.
     return;
   });
 }
